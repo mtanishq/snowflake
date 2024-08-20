@@ -1,0 +1,101 @@
+entity_id,entity_name,entity_type,risk_category,listed_date,source
+538d5603-0092-4889-af9d-7176e6a26cbd,Joseph Mitchell,Company,Low,2015-12-06,Interpol
+dd98d230-9d97-43f3-8c36-059c685c7d49,Albert Brown,Individual,Medium,2014-09-01,FBI
+6d742501-7033-40e9-84b7-a11a16a775e5,Gregory Cruz,Individual,Medium,2024-08-10,Local Police
+86b525e8-0fce-41dc-8363-e55e83ac3ed6,Jeffrey Carter,Individual,Low,2016-12-06,Local Police
+707e50f5-7b6e-4666-b5ec-36b661eb9a3a,Dawn Conrad,Individual,Low,2018-03-19,Local Police
+cdf86238-63b4-48db-886b-44da5b9014a5,Brandy Roberts,Individual,Low,2024-06-12,FBI
+c0b7a3c1-c689-484e-b68d-b39809c18966,Laura Kennedy,Individual,Low,2024-03-01,Local Police
+8cf9a2b6-dc11-4ea8-90f7-1b80f446f85a,Joseph Robbins,Company,High,2016-10-02,FBI
+262805a3-6f04-44a3-88af-9a7dd7e62e44,Courtney Olsen,Company,Medium,2020-02-29,FBI
+9640b827-2371-446f-a71f-4e2a3864ef92,Ruth Simmons,Company,Medium,2017-02-01,Interpol
+d44538f8-497d-499c-82c8-627cbd82a332,Jeffrey Stevenson,Individual,Medium,2020-11-11,FBI
+876067d3-dc5c-4ea1-8670-c76dcf30e1ce,Tamara Bernard DDS,Individual,Low,2020-08-17,FBI
+efb0e81a-81e4-4bd9-b808-24da501d0cda,Marilyn Gomez,Individual,Low,2018-02-03,Interpol
+59e690b3-a328-41df-979f-f353407492ac,Lisa Lane,Individual,High,2017-12-05,Local Police
+5ad2eec1-5844-48d8-98cb-5f4e35ef151c,Brian Roberts,Company,High,2022-11-20,Local Police
+5226e240-3450-427f-be90-d976ab7e604a,Christopher Galvan,Company,High,2015-03-13,Local Police
+cbd5aab4-2548-426c-907d-cac00c200e1c,Michael Alexander,Company,High,2017-03-21,Local Police
+c69b4635-a844-48ec-88af-fe815ec622b3,Angela Munoz,Individual,Medium,2020-04-21,Interpol
+7df41ea3-d909-468a-a857-ac8772649076,Brittany Wall,Company,Low,2018-04-14,Local Police
+0d1dd9df-64e3-4e3e-bebe-11c12c8dff51,Gabriela Clay,Individual,Medium,2018-08-03,FBI
+e876813f-e409-4295-a180-88ca389ab044,Sandra Moore,Individual,High,2023-03-14,FBI
+38d64817-2af4-4bd4-bc0e-550d45d3f1f8,Jennifer Herrera,Company,High,2023-01-17,Interpol
+c953cb19-b012-464a-bd74-d4851ac405bf,Ashley Vang,Individual,Low,2020-05-16,FBI
+5f2966a0-4dab-430c-9e15-d956489150a9,Cynthia Clark,Company,Low,2016-06-09,FBI
+0939942d-3e91-4b43-9d01-ba305b3e3de8,Jared Soto,Company,High,2024-04-02,Local Police
+6933fcca-cbf6-48a8-b499-dfb12aa9fd09,Steven Christensen,Company,Medium,2024-03-11,Interpol
+eb1c76ab-5752-4dce-9d36-5e0b8859d762,Nicole Wilson,Individual,Low,2024-02-09,FBI
+7183686c-239d-4e6f-8b80-3bcf83e99a3a,Connie Ochoa,Company,High,2021-01-14,Interpol
+17c82c00-7641-4f99-a2d0-50b9c67ef8b4,Christopher Stone,Individual,High,2017-12-13,FBI
+fdaed0ce-7850-4309-af47-83c6e2b47856,Gina Ortiz,Company,Low,2024-05-05,Local Police
+bc634a72-02d2-439b-a0f8-fab74494b04b,Adam Mclaughlin,Individual,High,2021-06-02,Local Police
+f4eb45b8-7b43-4149-a257-6b10f8927ba2,Parker Thomas,Company,Medium,2016-06-20,FBI
+fc391422-ce5e-46ec-9c76-efb3e468d4f5,Kenneth Hill,Individual,High,2019-08-24,FBI
+7d0aa3e3-c475-49f1-a5b2-ef5b222d45c1,John Nguyen,Individual,Low,2020-11-27,Interpol
+0dcc3c3b-96fb-4966-bc77-c69b6198ef54,Sherri Murphy,Company,High,2018-07-06,FBI
+57dd5453-c847-47c7-9203-5c3adfa71614,Joseph Gates,Individual,Low,2020-06-25,Local Police
+f1451ed1-a099-4884-b05c-c0d7c5e602e6,Sherry Yu,Individual,High,2022-05-23,Local Police
+92adfe33-b454-4533-b497-fee3b595aa9a,Jane Potter,Company,Low,2020-05-28,FBI
+83752658-229e-4507-bba9-fc5983ef22c7,Amy Hayes,Company,Medium,2019-06-20,Local Police
+a14d22bd-ffa1-4303-bd01-c3eddd1f3090,Jeremy Johnson,Individual,High,2015-08-05,FBI
+c07b3ff6-2c97-465b-b6c9-3f1534bdf6be,Chelsea Santiago,Individual,Medium,2023-07-30,FBI
+2bfef52b-400e-40a0-8dfc-66a190e299d0,Dakota Paul,Company,High,2019-01-28,Interpol
+0ff92cbd-4583-409d-b78f-2999ee999534,Tiffany Young,Individual,Medium,2019-09-27,Interpol
+beee6bc7-40b4-4d27-9370-3b2cf9c87a12,Edgar Lang,Individual,Medium,2021-12-26,Interpol
+dcf7b195-1a8d-49ab-b88f-0ee27d0fe968,Christine Smith,Company,Low,2015-02-28,Local Police
+9d3a9035-b561-4f42-a9f1-3de8a371a000,Joseph Reyes,Individual,Medium,2019-10-16,Interpol
+40a24225-1032-49db-a6a8-6035c0b6fa0c,Joshua Alvarez,Individual,Medium,2018-07-09,FBI
+d58b2580-d423-4b08-a649-197325e3287b,Joseph Harrison,Individual,Low,2017-07-11,Interpol
+27357571-a462-4ab9-856c-7df7e3b1e1ea,Sandra Lee,Individual,High,2022-01-12,FBI
+ca12ebcf-9ec9-4392-a0ff-694877e85e34,Veronica Campos,Individual,Medium,2021-08-11,FBI
+dd98d231-ca20-4206-8ec9-7291f113cc92,Robert Schaefer,Company,Low,2016-01-16,Local Police
+a46d4c90-d595-4c0a-ad8a-fe733e93a8ee,Timothy Hale,Individual,Medium,2015-08-13,Interpol
+336965ae-b0c4-45d2-a452-738f61a95300,Michael Flynn,Company,Low,2023-10-10,FBI
+7e75b4fb-660a-446a-93af-bd72536c085a,Chad Mcdaniel,Individual,Medium,2018-04-15,Local Police
+988cfbe4-4c39-4b51-b989-1b73a4745307,Kristy Patrick,Company,Low,2014-09-06,Local Police
+2055ffba-a467-483d-b722-0364411418cd,John Miller,Company,Low,2023-05-01,Local Police
+a4ee1fa1-bfe4-415f-94c4-38994e088468,Matthew Andrade,Individual,High,2023-02-16,FBI
+6e909c78-3a60-4a77-aa3f-2e7ddcf33023,Dennis Garcia,Individual,Low,2017-01-13,Local Police
+1a8d84d0-d894-4128-b3b2-b8d795cac22c,William Terry,Company,High,2019-05-27,Interpol
+5cb6ea5b-8b40-48bd-89f7-8a66fd76b968,David Allen,Individual,High,2019-02-05,Local Police
+6a06dd63-6a48-4862-8488-487c79f7bd57,Ian Washington,Company,High,2016-10-01,FBI
+df49c366-a837-4c53-a55e-ed896c2ce357,Barry Moore,Individual,High,2022-10-28,Interpol
+ae5dc6ab-b6bd-4068-a7c4-93dbcb8de3d5,Emma Rodriguez,Individual,Medium,2019-12-10,Interpol
+68064c3e-da72-4a4f-a556-92103d233f4a,Mary Jefferson,Company,High,2020-08-27,FBI
+991722fe-8769-4cb8-bd03-13ee8df414de,Anthony Anderson,Individual,High,2023-05-15,FBI
+dd9b841d-87e2-4149-8c3d-a50a9f976e46,Chad Buck,Company,Medium,2015-07-29,FBI
+0c32b12e-211f-4d94-9ce3-9f83f924a56a,Timothy Bartlett,Individual,Medium,2016-09-28,Interpol
+e51ecdb7-5681-4f8a-88b9-c52a623be503,Christopher Romero,Company,High,2016-05-04,Interpol
+76587915-be4a-4a83-8003-e8220bd0766a,John Martinez,Company,Medium,2022-09-04,Local Police
+d018e45c-4944-467d-898d-9ba6f667eaf7,Kelsey Liu,Individual,Low,2020-01-19,Local Police
+e5d2aaa3-01be-4c4f-a10f-7dc059365421,Brianna Fisher,Individual,Low,2018-08-16,FBI
+66b0406f-5ac4-4ace-af32-ef33ee4afb36,Andrew Hernandez,Individual,Medium,2015-03-07,Local Police
+9e926663-d911-4c4d-ba1a-e45804b6cc4d,Lisa Rogers,Individual,Medium,2021-06-01,Interpol
+64e53f47-96ac-4018-bdbf-14bb0f364fa3,William Knight,Individual,High,2016-03-13,Local Police
+f514ab82-cf19-40ca-9cc4-a634235232ae,Leah Davis,Company,High,2015-11-07,Interpol
+60b517d5-8f2b-4669-80c0-1e029ef1c39f,Tammy Ortiz,Company,Low,2016-10-15,Local Police
+a5a485d0-693e-4107-b5dc-8f6eec20d60d,Joshua Williams,Company,Medium,2018-06-01,FBI
+4c663255-67c7-42a9-a70c-f45514975261,Mary Hughes,Individual,Low,2018-02-24,FBI
+43d3e753-fef9-4ec9-bb64-ea42085b337a,Emily Smith,Individual,Medium,2014-08-24,Local Police
+56cb5316-88da-4f51-89f5-146050226751,Jacqueline Jefferson,Individual,Medium,2018-03-31,Interpol
+0e86248b-0418-4f90-9ea4-746b4c9334c5,Tiffany Mcintosh DVM,Individual,Medium,2024-03-26,Local Police
+50b15655-9c9f-452f-ba33-a38ddb3fc8af,Lisa Hall,Individual,High,2017-05-20,FBI
+40eef5d3-4f7b-4ae9-b6c5-66a1c0b5bb7f,Brandon Stevenson,Individual,Medium,2021-07-06,FBI
+adf8fc79-df01-4786-b589-25ca0eceff90,Marcus Mcfarland,Company,Low,2016-09-28,Interpol
+4d5d1d6c-72f2-4163-a2f6-483334563ad3,Caroline Morales,Company,Low,2023-08-27,Local Police
+0a6d487e-822c-4630-9ee6-852a442b4c90,Drew Ramirez,Individual,High,2018-07-01,Interpol
+88b4febd-7110-49ef-bed6-3044667d4bb1,Kenneth Olson,Company,Medium,2014-11-23,Local Police
+3464565c-9f85-4968-9d74-2d3df232aaa1,Karen Diaz,Individual,High,2016-09-25,Local Police
+0bfec39a-d75e-4ada-8b41-c1dcf7a2de79,Brenda Washington,Company,Medium,2015-06-09,Interpol
+7427ec2f-bb64-4d2c-a43d-9cb743ee2d23,Teresa Sutton,Company,Medium,2021-01-19,FBI
+41e8fdb3-e01a-4d35-be2b-a7945f0d7be2,Trevor Turner,Individual,Medium,2015-03-26,Interpol
+c19be19d-56cc-412c-b012-8cb9f2a6db74,Elizabeth Black,Company,Medium,2019-10-27,Interpol
+c2889b3b-04e7-46db-b393-d890fbbf7255,Mark Bates,Individual,Low,2023-03-21,Local Police
+0c745bfa-d2fd-4792-ac06-9cc5a4c6bb43,Samuel Cole,Individual,Low,2017-07-26,FBI
+c1b6fb64-9a22-461c-90e2-5bbf1c5ee7f6,David Myers,Individual,Medium,2021-09-04,FBI
+3aa173c1-d5df-432f-be42-64866b59d723,Diana Sanders,Individual,Medium,2019-11-10,FBI
+e14109a3-4a6f-4ed7-8ef9-23f0a9766d9f,Wendy Hayden,Individual,High,2017-02-13,FBI
+eb4181a5-7cbd-4fd5-9d81-4098ce90f562,Eric Green,Company,Medium,2016-03-31,Interpol
+8a4d06e8-086a-47f9-8729-58e681e28ec9,Maurice Huffman,Individual,High,2015-02-11,FBI
+2e456bde-ae0e-4a36-b77d-543ced30e95e,Kimberly Mullins,Individual,Medium,2023-09-26,FBI
