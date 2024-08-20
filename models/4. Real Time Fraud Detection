@@ -1,0 +1,114 @@
+
+# 1. Retraining the Machine Learning Model in Snowflake
+
+import snowflake.snowpark as snowpark
+from snowflake.snowpark.functions import udf, col
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import pickle
+
+def main(session: snowpark.Session): 
+    # 1. Load fresh data for retraining
+    query = """
+    SELECT amount, transaction_type, channel, is_fraudulent 
+    FROM transactions_raw
+    WHERE transaction_date >= DATEADD(MONTH, -1, CURRENT_DATE)
+    """
+    df = session.sql(query).to_pandas()
+
+    # 2. Prepare the data
+    X = df[['amount', 'transaction_type', 'channel']]
+    y = df['is_fraudulent']
+
+    # Convert categorical features to numeric using one-hot encoding
+    X = pd.get_dummies(X, columns=['transaction_type', 'channel'])
+
+    # 3. Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # 4. Train the model
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # 5. Save the model to a Snowflake stage
+    model_filename = "/tmp/fraud_detection_model.pkl"
+    with open(model_filename, 'wb') as model_file:
+        pickle.dump(model, model_file)
+
+    session.file.put(local_file_name=model_filename, stage_location='@my_stage/fraud_models/', overwrite=True)
+
+    # 6. Update the UDF to use the new model
+    @udf
+    def udf_ml_model_predict(features: list) -> float:
+        model = pickle.load(open("/tmp/fraud_detection_model.pkl", "rb"))
+        return model.predict([features])[0]
+
+    session.udf.register(udf_ml_model_predict, name="udf_ml_model_predict")
+
+    # Example: Applying the updated ML model to the transactions stream
+    transactions_df = session.table("transactions_raw")
+    features_df = transactions_df.select("amount", "transaction_type", "channel")
+    predictions_df = transactions_df.select("*", udf_ml_model_predict(features_df).alias("fraud_probability"))
+    
+    predictions_df.show()
+    return predictions_df
+
+
+
+# 2. Scheduling the Retraining Task
+
+
+import snowflake.snowpark as snowpark
+
+def main(session: snowpark.Session): 
+    # Create a task to retrain the fraud detection model periodically
+    session.sql("""
+        CREATE OR REPLACE TASK retrain_fraud_model_task
+        WAREHOUSE = 'COMPUTE_WH'
+        SCHEDULE = 'USING CRON 0 0 * * SUN UTC'  -- Run every Sunday
+        AS
+        CALL retrain_fraud_model();
+    """).collect()
+
+    # Show the task details to verify creation
+    task_df = session.sql("SHOW TASKS LIKE 'RETRAIN_FRAUD_MODEL_TASK'").collect()
+    return task_df
+
+
+# 3. Registering the Task as a Stored Procedure
+
+
+import snowflake.snowpark as snowpark
+
+def main(session: snowpark.Session):
+    # Register the stored procedure
+    session.sproc.register(
+        func=retrain_fraud_model,
+        name="retrain_fraud_model",
+        replace=True
+    )
+    
+    # Create and schedule the task
+    session.sql("""
+        CREATE OR REPLACE TASK retrain_fraud_model_task
+        WAREHOUSE = 'COMPUTE_WH'
+        SCHEDULE = 'USING CRON 0 0 * * SUN UTC'  -- Run every Sunday
+        AS
+        CALL retrain_fraud_model();
+    """).collect()
+
+    task_df = session.sql("SHOW TASKS LIKE 'RETRAIN_FRAUD_MODEL_TASK'").collect()
+    return task_df
+
+def retrain_fraud_model(session: snowpark.Session):
+    # Retrain logic as previously defined
+    # Load data, preprocess, train, save model, update UDF
+    pass  # Replace with your retraining logic
+
+
+
+#######################################################################################################
+#######################################################################################################
+
+

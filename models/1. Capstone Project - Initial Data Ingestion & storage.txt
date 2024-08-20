@@ -1,0 +1,207 @@
+-------------------------------------------------------------------------------------------------------
+-------------------------------------------CAPSTONE PROJECT -------------------------------------------
+
+-- 1. Create a Warehouse
+CREATE OR REPLACE WAREHOUSE capstone_wh
+WITH WAREHOUSE_SIZE = 'XSMALL' AUTO_SUSPEND = 300 AUTO_RESUME = TRUE;
+
+-- 2. Create a Database and Schema
+-- Create a database for raw data
+CREATE OR REPLACE DATABASE raw_data_db;
+-- Create schema for raw data
+CREATE OR REPLACE SCHEMA raw_data_db.raw_schema;
+
+-- Create a database for cleansed data
+CREATE OR REPLACE DATABASE cleansed_data_db;
+-- Create schema for cleansed data
+CREATE OR REPLACE SCHEMA cleansed_data_db.cleansed_schema;
+
+USE raw_data_db.raw_schema;
+
+------------------------------------------- SNOWFLAKE SETUP -------------------------------------------
+--Snowflake Setup for ingesting raw data from S3 Bucket:
+-- A. Create a staging area in Snowflake to receive data from S3.
+-- B. Set up Snowpipe to continuously ingest data from S3 into raw tables in Snowflake
+-- C. Create views on top of raw tables to implement any initial data quality rules
+
+-- 1. Creating tables ---------------------------------------------------------------------------------
+-- Creating transactions table
+CREATE OR REPLACE TABLE transactions_raw (
+    transaction_id STRING,
+    customer_id STRING,
+    account_id STRING,
+    transaction_date STRING, -- or FLOAT if storing as a duration
+    amount FLOAT,
+    currency STRING,
+    transaction_type STRING,
+    channel STRING,
+    merchant_name STRING,
+    merchant_category STRING,
+    location_country STRING,
+    location_city STRING,
+    is_flagged BOOLEAN
+);
+
+
+-- Creating customers table
+CREATE OR REPLACE TABLE customers_raw (
+    customer_id STRING,
+    first_name STRING,
+    last_name STRING,
+    date_of_birth DATE,  -- Will need conversion from DD-MM-YYYY to YYYY-MM-DD
+    gender STRING,
+    email STRING,
+    phone_number STRING,  -- Ensure consistency in formatting
+    address STRING,
+    city STRING,
+    country STRING,
+    occupation STRING,
+    income_bracket STRING,
+    customer_since DATE  -- Will need conversion from DD-MM-YYYY to YYYY-MM-DD
+);
+
+
+-- Creating accounts table
+CREATE OR REPLACE TABLE accounts_raw (
+    account_id STRING,
+    customer_id STRING,
+    account_type STRING,
+    account_status STRING,
+    open_date DATE,
+    current_balance FLOAT,
+    currency STRING,
+    credit_limit FLOAT
+);
+
+-- Creating credit_data table
+CREATE OR REPLACE TABLE credit_data_raw (
+    customer_id STRING,
+    credit_score INT,
+    number_of_credit_accounts INT,
+    total_credit_limit FLOAT,
+    total_credit_used FLOAT,
+    number_of_late_payments INT,
+    bankruptcies INT
+);
+
+-- Creating watchlist table
+CREATE OR REPLACE TABLE watchlist_raw (
+    entity_id STRING,
+    entity_name STRING,
+    entity_type STRING,
+    risk_category STRING,
+    listed_date DATE,
+    source STRING
+);
+
+
+-- 2. Creating Storage Integration -----------------------------------------------------------------------
+
+CREATE OR REPLACE STORAGE INTEGRATION s3_integration
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = S3
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::227122424608:role/Assgn4'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://mycapstonebucket99/RawData/');
+
+-- 3. Creating File Format -----------------------------------------------------------------------
+
+--Create file formats
+CREATE OR REPLACE FILE FORMAT csv_format
+TYPE = 'CSV'
+FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+FIELD_DELIMITER = ','
+SKIP_HEADER = 1
+ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE;
+DATE_FORMAT = 'DD-MM-YYYY';
+
+
+
+-- 4. Creating External Stage -----------------------------------------------------------------------
+
+-- Creating External Stage
+CREATE OR REPLACE STAGE s3_stage
+  URL = 's3://mycapstonebucket99/RawData/'
+  STORAGE_INTEGRATION = s3_integration
+  FILE_FORMAT = csv_format;
+
+
+-- Configuring 
+desc integration s3_integration;
+
+-- 5. Creating Snowpipe for each entity --------------------------------------------------------------
+-- Snowpipe for transactions table
+-- Snowpipe for transactions table
+CREATE OR REPLACE PIPE transactions_pipe
+  AUTO_INGEST = TRUE
+  AS
+  COPY INTO transactions_raw
+  FROM @s3_stage
+  FILE_FORMAT = (FORMAT_NAME = RAW_DATA_DB.RAW_SCHEMA.csv_format)
+  ON_ERROR = CONTINUE;
+
+-- Snowpipe for customers table
+CREATE OR REPLACE PIPE customers_pipe
+  AUTO_INGEST = TRUE
+  AS
+  COPY INTO customers_raw
+  FROM @s3_stage
+  FILE_FORMAT = (FORMAT_NAME = RAW_DATA_DB.RAW_SCHEMA.csv_format);
+
+-- Snowpipe for accounts table
+CREATE OR REPLACE PIPE accounts_pipe
+  AUTO_INGEST = TRUE
+  AS
+  COPY INTO accounts_raw
+  FROM @s3_stage
+  FILE_FORMAT = (FORMAT_NAME = RAW_DATA_DB.RAW_SCHEMA.csv_format);
+
+-- Snowpipe for credit_data table
+CREATE OR REPLACE PIPE credit_data_pipe
+  AUTO_INGEST = TRUE
+  AS
+  COPY INTO credit_data_raw
+  FROM @s3_stage
+  FILE_FORMAT = (FORMAT_NAME = RAW_DATA_DB.RAW_SCHEMA.csv_format);
+
+-- Snowpipe for watchlist table
+CREATE OR REPLACE PIPE watchlist_pipe
+  AUTO_INGEST = TRUE
+  AS
+  COPY INTO watchlist_raw
+  FROM @s3_stage
+  FILE_FORMAT = (FORMAT_NAME = RAW_DATA_DB.RAW_SCHEMA.csv_format);
+
+-- 6. Subscribe the Snowflake SQS Queue in s3 --------------------------------------------------------------
+-- Created event_notication in S3 bucket, and pasted notification_channel arn into it.
+-- Notification_channel : arn:aws:sqs:ap-south-1:211125613752:sf-snowpipe-AIDATCKARGS4PZXVKKG7O-wHpJazSI46h0gFSgMfb_0A
+-- Checking current status of pipes:
+SHOW PIPES;
+
+
+-- To manually refresh the pipe (force it to load data immediately):
+ALTER PIPE TRANSACTIONS_PIPE REFRESH;
+ALTER PIPE CUSTOMERS_PIPE REFRESH;
+ALTER PIPE ACCOUNTS_PIPE REFRESH;
+ALTER PIPE CREDIT_DATA_PIPE REFRESH;
+ALTER PIPE WATCHLIST_PIPE REFRESH;
+
+
+-- 7. Monitor and Validate -----------------------------------------------------------------------------------
+-- View the status and last load of the pipes
+SELECT system$pipe_status('transactions_pipe');
+SELECT system$pipe_status('customers_pipe');
+SELECT system$pipe_status('accounts_pipe');
+SELECT system$pipe_status('credit_data_pipe');
+SELECT system$pipe_status('watchlist_pipe');
+
+-- Check loaded data
+SELECT * FROM transactions_raw;
+SELECT * FROM customers_raw;
+SELECT * FROM accounts_raw;
+SELECT * FROM credit_data_raw;
+SELECT * FROM watchlist_raw;
+
+----------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------

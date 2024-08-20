@@ -1,0 +1,220 @@
+-- 1. Creating the Role
+CREATE ROLE PC_DBT_ROLE;
+
+-- 2. Granting Necessary Privileges to the Role
+-- Grant usage on the database
+GRANT USAGE ON DATABASE CLEAN_DB TO ROLE PC_DBT_ROLE;
+
+-- Grant usage on the schema
+GRANT USAGE ON SCHEMA CLEAN_DB.CLEANSCHEMA TO ROLE PC_DBT_ROLE;
+
+-- Grant all privileges on the tables within the schema
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA CLEAN_DB.CLEANSCHEMA TO ROLE PC_DBT_ROLE;
+
+-- 3. Assigning the Role to a User
+GRANT ROLE PC_DBT_ROLE TO USER your_user_name;
+
+SHOW GRANTS TO ROLE PC_DBT_ROLE;
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+
+-- Cleansing and Transformation Rules in Snowflake -------------------------------------------------------
+
+-- 1. Creating UDF for categorizing transaction amounts into "High", "Medium", or "Low" risk levels. ------
+
+CREATE OR REPLACE FUNCTION trans_func(amount NUMBER)
+RETURNS STRING
+LANGUAGE SQL 
+AS
+$$
+  CASE 
+    WHEN amount > 500 THEN 'High'
+    WHEN amount BETWEEN 100 AND 200 THEN 'Medium'
+    ELSE 'Low' 
+  END
+$$;
+
+--------------------------------------------------------------------------------------------------------
+-- Grant Usage to Role
+GRANT USAGE ON FUNCTION trans_func(NUMBER) TO ROLE PC_DBT_ROLE;
+--------------------------------------------------------------------------------------------------------
+-- Running below command in DBT
+-- SELECT *, 
+--       RAW_DB.GLOBALSCHEMA.trans_func(amount) AS risk_level 
+-- FROM RAW_DB.GLOBALSCHEMA.transactions;
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- 2. Creating UDF for Cleaning Date of Birth ----------------------------------------------------------
+--  Cleansing date of birth by replacing null or invalid dates with a default value based on the customer_since date
+CREATE OR REPLACE FUNCTION cleanse_dob(customer_since DATE, date_of_birth DATE)
+RETURNS DATE
+LANGUAGE SQL
+AS
+$$
+  CASE 
+    WHEN date_of_birth IS NULL THEN DATEADD(YEAR, -18, customer_since)
+    WHEN DATEDIFF(YEAR, date_of_birth, CURRENT_DATE) > 100 
+         OR DATEDIFF(YEAR, date_of_birth, CURRENT_DATE) < 0 
+         THEN DATEADD(YEAR, -18, customer_since)
+    ELSE date_of_birth
+  END
+$$;
+
+--------------------------------------------------------------------------------------------------------
+GRANT USAGE ON FUNCTION cleanse_dob(DATE, DATE) TO ROLE PC_DBT_ROLE;
+
+--------------------------------------------------------------------------------------------------------
+-- Running below command in DBT
+--SELECT 
+--    customer_id,
+--    first_name,
+--    last_name,
+--    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob
+--FROM 
+--   customer;
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- 3. UDF for Standardizing Address Fields -------------------------------------------------------------
+CREATE OR REPLACE FUNCTION new_address(address STRING)
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+  INITCAP(TRIM(address))
+$$;
+--------------------------------------------------------------------------------------------------------
+-- Grant Usage to Role
+GRANT USAGE ON FUNCTION standardize_address(STRING) TO ROLE PC_DBT_ROLE;
+--------------------------------------------------------------------------------------------------------
+-- Running below command in DBT
+--SELECT
+--  customer_id,
+--  standardize_address(address) AS standardized_address
+--FROM
+--  customers;
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- 4. UDF for Standardizing Phone Numbers --------------------------------------------------------------
+CREATE OR REPLACE FUNCTION standardize_phone_number(phone_number STRING)
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+WITH cleansed_number AS (
+    -- Remove all non-numeric characters except for '+' at the start
+    SELECT
+        CASE
+            WHEN LEFT(phone_number, 1) = '+' THEN '+' || REGEXP_REPLACE(phone_number, '[^0-9]', '')
+            ELSE REGEXP_REPLACE(phone_number, '[^0-9]', '')
+        END AS clean_number
+),
+country_code_area AS (
+    SELECT
+        CASE
+            -- When the number starts with '+' followed by a 1-3 digit country code
+            WHEN LEFT(clean_number, 1) = '+' THEN LEFT(clean_number, LENGTH(REGEXP_SUBSTR(clean_number, '\\+\\d{1,3}')))
+            -- Default to +1 if no explicit country code
+            ELSE '+1'
+        END AS country_code,
+        -- Remove country code to extract remaining digits
+        CASE
+            WHEN LEFT(clean_number, 1) = '+' THEN SUBSTR(clean_number, LENGTH(REGEXP_SUBSTR(clean_number, '\\+\\d{1,3}')) + 1)
+            ELSE clean_number
+        END AS remaining_digits
+    FROM cleansed_number
+)
+SELECT
+    -- Combine country code with area code and main phone number
+    country_code || '-' || 
+    SUBSTR(remaining_digits, 1, 3) || '-' || 
+    SUBSTR(remaining_digits, 4, 3) || '-' || 
+    SUBSTR(remaining_digits, 7, 4) AS standardized_number
+FROM country_code_area
+$$;
+
+--------------------------------------------------------------------------------------------------------
+
+GRANT USAGE ON FUNCTION standardize_phone_number(STRING) TO ROLE PC_DBT_ROLE;
+
+--------------------------------------------------------------------------------------------------------
+-- Running below command in DBT
+--SELECT
+--  phone_number,
+--  standardize_phone_number(phone_number) AS standardized_phone_number
+--FROM
+--  customers;
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+-- 5. UDF for Normalizing Gender Values ---------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION normalize_gender(gender STRING)
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+  CASE 
+    WHEN LOWER(gender) IN ('m', 'male', 'man') THEN 'Male'
+    WHEN LOWER(gender) IN ('f', 'female', 'woman') THEN 'Female'
+    ELSE 'Other'
+  END
+$$;
+
+--------------------------------------------------------------------------------------------------------
+
+GRANT USAGE ON FUNCTION normalize_gender(STRING) TO ROLE PC_DBT_ROLE;
+
+--------------------------------------------------------------------------------------------------------
+-- Running below command in DBT
+--SELECT
+--  customer_id,
+--  normalize_gender(gender) AS normalized_gender
+--FROM
+--  customers;
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+
+-------- Applying above UDFs already created to clean and standardize the data in tables -----------------
+
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+
+SELECT 
+    customer_id,
+    trans_func(amount) AS risk_level,
+    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob,
+    standardize_address(address) AS standardized_address,
+    standardize_phone_number(phone_number) AS standardized_phone_number,
+    normalize_gender(gender) AS normalized_gender
+FROM 
+    RAW_DB.GLOBALSCHEMA.customers;
+
+-- Create views or new tables that store the cleaned and transformed data.
+CREATE OR REPLACE VIEW CLEAN_DB.CUSTOMERS_CLEANED AS
+SELECT 
+    customer_id,
+    cleanse_first_name(first_name) AS first_name_cleaned,
+    cleanse_last_name(last_name) AS last_name_cleaned,
+    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob,
+    standardize_address(address) AS standardized_address,
+    standardize_phone_number(phone_number) AS standardized_phone_number,
+    normalize_gender(gender) AS normalized_gender
+FROM 
+    RAW_DB.GLOBALSCHEMA.customers;
+
