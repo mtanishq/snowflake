@@ -1,0 +1,159 @@
+-- Step 1: Create a unified customer profile by merging data from various sources
+
+CREATE OR REPLACE VIEW unified_customer_profile AS
+SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.gender,
+    c.email,
+    c.phone_number,
+    c.address,
+    c.city,
+    c.country,
+    c.occupation,
+    c.income_bracket,
+    c.customer_since,
+    a.account_type,
+    a.current_balance,
+    a.currency AS account_currency,
+    cr.credit_score,
+    cr.total_credit_limit,
+    cr.total_credit_used,
+    cr.number_of_late_payments,
+    cr.bankruptcies,
+    wl.risk_category AS watchlist_risk_category
+FROM 
+    customers_raw c
+LEFT JOIN 
+    accounts_raw a ON c.customer_id = a.customer_id
+LEFT JOIN 
+    credit_data_raw cr ON c.customer_id = cr.customer_id
+LEFT JOIN 
+    watchlist_raw wl ON c.customer_id = wl.entity_id;
+
+
+
+-- Step 2 : Creating Materialized Views for Frequently Accessed Customer Data
+
+CREATE OR REPLACE MATERIALIZED VIEW customer_360_view AS
+SELECT 
+    customer_id,
+    first_name,
+    last_name,
+    gender,
+    email,
+    phone_number,
+    city,
+    country,
+    occupation,
+    income_bracket,
+    customer_since,
+    COUNT(account_id) AS number_of_accounts,
+    SUM(current_balance) AS total_balance,
+    AVG(credit_score) AS average_credit_score,
+    SUM(total_credit_used) AS total_credit_used,
+    SUM(number_of_late_payments) AS total_late_payments,
+    MAX(bankruptcies) AS max_bankruptcies,
+    MAX(watchlist_risk_category) AS highest_risk_category
+FROM 
+    unified_customer_profile
+GROUP BY 
+    customer_id, first_name, last_name, gender, email, 
+    phone_number, city, country, occupation, 
+    income_bracket, customer_since;
+
+
+-- Step 3. Developing Stored Procedures for Complex Customer Segmentation and Analysis
+
+
+CREATE OR REPLACE PROCEDURE customer_segmentation_procedure(segment_type STRING)
+RETURNS TABLE(customer_id STRING, first_name STRING, last_name STRING, segment_criteria STRING)
+LANGUAGE SQL
+AS
+$$
+BEGIN
+    IF segment_type = 'high_value' THEN
+        RETURN TABLE(
+            SELECT 
+                customer_id, first_name, last_name, 'High Value' AS segment_criteria
+            FROM 
+                customer_360_view
+            WHERE 
+                income_bracket = 'High' 
+                AND average_credit_score >= 750
+                AND total_balance > 50000
+        );
+    ELSEIF segment_type = 'at_risk' THEN
+        RETURN TABLE(
+            SELECT 
+                customer_id, first_name, last_name, 'At Risk' AS segment_criteria
+            FROM 
+                customer_360_view
+            WHERE 
+                total_late_payments > 3 
+                OR average_credit_score < 600
+                OR highest_risk_category = 'High'
+        );
+    ELSE
+        RETURN TABLE(
+            SELECT 
+                customer_id, first_name, last_name, 'General' AS segment_criteria
+            FROM 
+                customer_360_view
+        );
+    END IF;
+END;
+$$;
+
+-- Creating task for Data Quality Checks
+
+CREATE OR REPLACE TASK task_data_quality_checks
+WAREHOUSE = 'COMPUTE_WH'
+AFTER task_ingest_data  -- Or AFTER task_transform_data if post-transformation checks are required
+AS
+CALL data_quality_checks();
+
+CREATE OR REPLACE PROCEDURE data_quality_checks()
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+BEGIN
+    -- Example: Perform checks on the ingested/transformed data
+    -- You can flag rows with missing values, incorrect formats, etc.
+    -- E.g., check for null values in critical columns
+    INSERT INTO quality_issues_table
+    SELECT 'Missing Value', 'transactions_raw', 'transaction_id', COUNT(*)
+    FROM transactions_raw
+    WHERE transaction_id IS NULL;
+
+    RETURN 'Data Quality Checks Completed';
+END;
+$$;
+
+
+-- Creating task for Monitoring and Alerts
+
+CREATE OR REPLACE TASK task_monitoring_and_alerts
+WAREHOUSE = 'COMPUTE_WH'
+SCHEDULE = 'USING CRON 0 15 * * * UTC'  -- Runs every 15 minutes
+AS
+CALL monitoring_and_alerts();
+
+CREATE OR REPLACE PROCEDURE monitoring_and_alerts()
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+BEGIN
+    -- Example: Check for errors or unusual patterns and send alerts
+    -- Implement logic to detect potential problems, e.g., no data ingestion in the last hour
+    IF (SELECT COUNT(*) FROM task_history WHERE status = 'FAILED' AND completed_on > CURRENT_TIMESTAMP() - INTERVAL '1' HOUR) > 0 THEN
+        -- Send an alert (using an external service or Snowflake's notification system)
+        RETURN 'Alert Sent: Task Failure Detected';
+    END IF;
+
+    RETURN 'Monitoring Completed: No Issues Detected';
+END;
+$$;

@@ -1,0 +1,80 @@
+--  Creating new Database for Cleansed Data
+CREATE DATABASE IF NOT EXISTS CLEAN_DB;
+
+-- Creating a Schema for Cleansed Data
+CREATE SCHEMA IF NOT EXISTS CLEAN_DB.CLEANSCHEMA;
+
+-- 1. Creating Cleansed customers Table
+CREATE OR REPLACE TABLE CLEAN_DB.CLEANSCHEMA.CUSTOMERS_CLEANED AS
+SELECT 
+    customer_id,
+    cleanse_first_name(first_name) AS first_name_cleaned,
+    cleanse_last_name(last_name) AS last_name_cleaned,
+    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob,
+    standardize_address(address) AS standardized_address,
+    standardize_phone_number(phone_number) AS standardized_phone_number,
+    normalize_gender(gender) AS normalized_gender
+FROM 
+    RAW_DB.GLOBALSCHEMA.customers;
+
+    
+-- 2. Creating Cleansed transactions Table
+CREATE OR REPLACE TABLE CLEAN_DB.CLEANSCHEMA.TRANSACTIONS_CLEANED AS
+SELECT 
+    transaction_id,
+    account_id,
+    trans_func(amount) AS risk_level,
+    amount,
+    transaction_date,
+    transaction_type,
+    merchant_id
+FROM 
+    RAW_DB.GLOBALSCHEMA.transactions;
+
+    
+-- 3. Creating Cleansed accounts Table
+CREATE OR REPLACE TABLE CLEAN_DB.CLEANSCHEMA.ACCOUNTS_CLEANED AS
+SELECT 
+    account_id,
+    cleanse_first_name(account_name) AS account_name_cleaned,
+    account_type,
+    standardize_address(account_address) AS standardized_account_address,
+    standardize_phone_number(account_phone) AS standardized_account_phone,
+    open_date,
+    close_date
+FROM 
+    RAW_DB.GLOBALSCHEMA.accounts;
+
+
+-- 4. Creating Cleansed credit_data Table
+CREATE OR REPLACE TABLE CLEAN_DB.CLEANSCHEMA.CREDIT_DATA_CLEANED AS
+SELECT 
+    credit_id,
+    customer_id,
+    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob,
+    credit_score,
+    credit_limit,
+    outstanding_balance
+FROM 
+    RAW_DB.GLOBALSCHEMA.credit_data;
+
+
+-- 5. Creating Cleansed watchlist Table
+CREATE OR REPLACE TABLE CLEAN_DB.CLEANSCHEMA.WATCHLIST_CLEANED AS
+SELECT 
+    watchlist_id,
+    cleanse_first_name(first_name) AS first_name_cleaned,
+    cleanse_last_name(last_name) AS last_name_cleaned,
+    cleanse_dob(customer_since, date_of_birth) AS cleansed_dob,
+    standardize_address(address) AS standardized_address,
+    standardize_phone_number(phone_number) AS standardized_phone_number,
+    normalize_gender(gender) AS normalized_gender,
+    risk_level
+FROM 
+    RAW_DB.GLOBALSCHEMA.watchlist;
+
+
+-- Applying Permissions
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA CLEAN_DB.CLEANSCHEMA TO ROLE PC_DBT_ROLE;
+
